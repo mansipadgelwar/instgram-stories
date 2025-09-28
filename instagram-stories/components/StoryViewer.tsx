@@ -1,6 +1,26 @@
 import { useEffect, useState, useCallback } from "react";
 
-export default function StoryViewer({ stories, startIndex, onClose, onPrevProfile, onNextProfile }) {
+type Story = {
+  id: string | number;
+  src: string;
+  // add other properties if needed
+};
+
+type StoryViewerProps = {
+  stories: Story[];
+  startIndex: number;
+  onClose: () => void;
+  onPrevProfile?: () => void;
+  onNextProfile?: () => void;
+};
+
+export default function StoryViewer({
+  stories,
+  startIndex,
+  onClose,
+  onPrevProfile,
+  onNextProfile
+}: StoryViewerProps) {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [loading, setLoading] = useState(true);
   const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
@@ -8,7 +28,6 @@ export default function StoryViewer({ stories, startIndex, onClose, onPrevProfil
 
   const handleNext = useCallback(() => {
     if (currentIndex >= stories.length - 1) {
-      // If we're at the last story, close the viewer
       onClose();
       return;
     }
@@ -18,10 +37,7 @@ export default function StoryViewer({ stories, startIndex, onClose, onPrevProfil
 
   const handlePrev = useCallback(() => {
     if (currentIndex <= 0) {
-      // If we're at the first story, either go to previous profile or do nothing
-      if (onPrevProfile) {
-        onPrevProfile();
-      }
+      onPrevProfile?.();
       return;
     }
     setLoading(true);
@@ -40,66 +56,46 @@ export default function StoryViewer({ stories, startIndex, onClose, onPrevProfil
 
   if (!stories[currentIndex]) return null;
 
-  const handleTouchStart = (e) => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     setTouchStart({
       x: e.touches[0].clientX,
       y: e.touches[0].clientY
     });
   };
 
-  const handleTouchMove = (e) => {
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!touchStart.x && !touchStart.y) return;
-    
+
     const currentTouch = {
       x: e.touches[0].clientX,
       y: e.touches[0].clientY
     };
-    
+
     const diff = {
       x: currentTouch.x - touchStart.x,
       y: currentTouch.y - touchStart.y
     };
-    
-    // Determine if the gesture is primarily horizontal or vertical
+
     const isHorizontalSwipe = Math.abs(diff.x) > Math.abs(diff.y);
-    
-    // Add resistance to the movement
     const resistance = 0.4;
+
     if (isHorizontalSwipe) {
-      // Handle horizontal swipe
-      setTranslate(prev => ({
-        ...prev,
-        x: diff.x * resistance
-      }));
+      setTranslate((prev) => ({ ...prev, x: diff.x * resistance }));
     } else {
-      // Handle vertical swipe (only allow pulling down)
       if (diff.y < 0) return;
-      setTranslate(prev => ({
-        ...prev,
-        y: diff.y * resistance
-      }));
+      setTranslate((prev) => ({ ...prev, y: diff.y * resistance }));
     }
   };
 
   const handleTouchEnd = () => {
-    const threshold = {
-      x: 100, // Threshold for horizontal swipe
-      y: 150  // Threshold for vertical swipe (close gesture)
-    };
+    const threshold = { x: 100, y: 150 };
 
     if (Math.abs(translate.x) > threshold.x) {
-      // Horizontal swipe
-      if (translate.x > 0) {
-        onPrevProfile?.(); // Swipe right to previous profile
-      } else {
-        onNextProfile?.(); // Swipe left to next profile
-      }
+      translate.x > 0 ? onPrevProfile?.() : onNextProfile?.();
     } else if (translate.y > threshold.y) {
-      // Vertical swipe down - close the story
       onClose();
     }
 
-    // Reset position
     setTranslate({ x: 0, y: 0 });
     setTouchStart({ x: 0, y: 0 });
   };
@@ -112,16 +108,17 @@ export default function StoryViewer({ stories, startIndex, onClose, onPrevProfil
           <line x1="6" y1="6" x2="18" y2="18"></line>
         </svg>
       </button>
-      
-      <div 
+
+      <div
         className="story-container"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ 
+        style={{
           transform: `translate3d(${translate.x}px, ${translate.y}px, 0)`,
-          opacity: Math.max(1 - Math.abs(translate.y) / 400, 0.5) // Fade out when pulling down
-        }}>
+          opacity: Math.max(1 - Math.abs(translate.y) / 400, 0.5)
+        }}
+      >
         {loading && <div className="loader"></div>}
         <img
           src={stories[currentIndex].src}
