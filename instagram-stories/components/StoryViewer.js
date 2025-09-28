@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export default function StoryViewer({ stories, startIndex, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
@@ -7,26 +7,29 @@ export default function StoryViewer({ stories, startIndex, onClose }) {
   const [translateY, setTranslateY] = useState(0);
 
   useEffect(() => {
-    if (stories.length === 0) return;
+    if (stories.length === 0 || currentIndex >= stories.length) return;
 
     const timer = setTimeout(() => {
       handleNext();
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [currentIndex]);
+  }, [currentIndex, stories.length, handleNext]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setLoading(true);
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  };
+  }, []);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
+    if (currentIndex >= stories.length - 1) {
+      // If we're at the last story, close the viewer
+      onClose();
+      return;
+    }
     setLoading(true);
-    setCurrentIndex((prev) =>
-      prev < stories.length - 1 ? prev + 1 : prev
-    );
-  };
+    setCurrentIndex((prev) => prev + 1);
+  }, [currentIndex, stories.length, onClose]);
 
   if (!stories[currentIndex]) return null;
 
