@@ -17,9 +17,16 @@ export default function StoryViewer({ stories, startIndex, onClose, onPrevProfil
   }, [currentIndex, stories.length, onClose]);
 
   const handlePrev = useCallback(() => {
+    if (currentIndex <= 0) {
+      // If we're at the first story, either go to previous profile or do nothing
+      if (onPrevProfile) {
+        onPrevProfile();
+      }
+      return;
+    }
     setLoading(true);
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  }, []);
+    setCurrentIndex((prev) => prev - 1);
+  }, [currentIndex, onPrevProfile]);
 
   useEffect(() => {
     if (stories.length === 0 || currentIndex >= stories.length) return;
