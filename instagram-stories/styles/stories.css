@@ -14,17 +14,24 @@
 }
 
 .story-thumbnail {
-  min-width: 62px; /* Prevent squishing by setting minimum width */
+  min-width: 62px;
   width: 62px;
   height: 62px;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
-  border: 3px solid #d6249f;
-  padding: 2px;
-  box-sizing: content-box; /* Change to content-box to prevent border and padding from affecting size */
-  background: white;
-  flex-shrink: 0; /* Prevent the images from shrinking */
+  padding: 3px;
+  box-sizing: content-box;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  flex-shrink: 0;
+}
+
+.story-thumbnail img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-sizing: border-box;
 }
 
 .story-viewer {

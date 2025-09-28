@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function StoriesBar({ onStorySelect }) {
   const [stories, setStories] = useState([]);
@@ -12,13 +13,18 @@ export default function StoriesBar({ onStorySelect }) {
   return (
     <div className="stories-bar">
       {stories.map((story) => (
-        <img
+        <div
           key={story.id}
-          src={story.src}
-          alt="story"
           className="story-thumbnail"
           onClick={() => onStorySelect(story.id)}
-        />
+        >
+          <Image
+            src={story.src}
+            alt="story"
+            width={62}
+            height={62}
+          />
+        </div>
       ))}
     </div>
   );
