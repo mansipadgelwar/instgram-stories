@@ -115,7 +115,7 @@ export default function StoryViewer({ stories, startIndex, onClose, onPrevProfil
           transform: `translate3d(${translate.x}px, ${translate.y}px, 0)`,
           opacity: Math.max(1 - Math.abs(translate.y) / 400, 0.5) // Fade out when pulling down
         }}>
-        {loading && <div className="loader">Loading...</div>}
+        {loading && <div className="loader"></div>}
         <img
           src={stories[currentIndex].src}
           alt="story"
