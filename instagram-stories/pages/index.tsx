@@ -1,44 +1,48 @@
-import { useState, useEffect, SetStateAction } from "react";
+import { useState, useEffect } from "react";
 import StoriesBar from "../components/StoriesBar";
 import StoryViewer from "../components/StoryViewer";
 
 type Story = {
-  id: string | number;
-  // add other properties as needed
+  id: number; // force number
+  src: string;
 };
-
 export default function Home() {
   const [stories, setStories] = useState<Story[]>([]);
- // selectedStory can be number or null
-const [selectedStory, setSelectedStory] = useState<number | null>(null);
+  const [selectedStory, setSelectedStory] = useState<number | null>(null);
+  const [watched, setWatched] = useState<number[]>([]);
 
-// watched is always an array of numbers
-const [watched, setWatched] = useState<number[]>([]);
+ const handleStorySelect = (id: string | number) => {
+  // If you only want numbers in watched, convert to number (optional)
+  const numericId = typeof id === "number" ? id : parseInt(id, 10);
 
-const handleStorySelect = (id: number) => {
-  setSelectedStory(id);
+  setSelectedStory(numericId);
 
-  setWatched((prev) => 
-    prev.includes(id) ? prev : [...prev, id]
+  setWatched((prev) =>
+    prev.includes(numericId) ? prev : [...prev, numericId]
   );
 };
-
-
 
   useEffect(() => {
     fetch("/data/stories.json")
       .then((res) => res.json())
-      .then((data) => setStories(data));
+      .then((data: Story[]) => setStories(data));
   }, []);
+
+  const startIndex = selectedStory !== null 
+    ? stories.findIndex((s) => s.id === selectedStory) 
+    : -1;
 
   return (
     <div>
-      <StoriesBar onStorySelect={handleStorySelect} watched={watched}/>
-      {selectedStory !== null && (
+      <StoriesBar onStorySelect={handleStorySelect} watched={watched} />
+      {selectedStory !== null && startIndex !== -1 && (
         <StoryViewer
           stories={stories}
-          startIndex={stories.findIndex((s) => s.id === selectedStory)}
-          onClose={() => setSelectedStory(null)} onPrevProfile={undefined} onNextProfile={undefined}        />
+          startIndex={startIndex}
+          onClose={() => setSelectedStory(null)}
+          onPrevProfile={() => {}}
+          onNextProfile={() => {}}
+        />
       )}
     </div>
   );

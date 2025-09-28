@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export default function StoriesBar({ onStorySelect,watched = [] }) {
-  const [stories, setStories] = useState([]);
+type Story = {
+  id: string | number;
+  src: string;
+  // add other properties if needed
+};
+
+type StoriesBarProps = {
+  onStorySelect: (id: string | number) => void;
+  watched?: (string | number)[];
+};
+
+export default function StoriesBar({ onStorySelect, watched = [] }: StoriesBarProps) {
+  const [stories, setStories] = useState<Story[]>([]);
 
   useEffect(() => {
     fetch("/data/stories.json")
       .then((res) => res.json())
-      .then((data) => setStories(data));
+      .then((data: Story[]) => setStories(data));
   }, []);
 
   return (
@@ -15,7 +26,7 @@ export default function StoriesBar({ onStorySelect,watched = [] }) {
       {stories.map((story) => (
         <div
           key={story.id}
-         className={`story-thumbnail ${
+          className={`story-thumbnail ${
             watched.includes(story.id) ? "watched" : "unwatched"
           }`}
           onClick={() => onStorySelect(story.id)}
