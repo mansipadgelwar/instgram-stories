@@ -1,25 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 
-export default function StoryViewer({ stories, startIndex, onClose }) {
+export default function StoryViewer({ stories, startIndex, onClose, onPrevProfile, onNextProfile }) {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [loading, setLoading] = useState(true);
-  const [touchStart, setTouchStart] = useState(null);
-  const [translateY, setTranslateY] = useState(0);
-
-  useEffect(() => {
-    if (stories.length === 0 || currentIndex >= stories.length) return;
-
-    const timer = setTimeout(() => {
-      handleNext();
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [currentIndex, stories.length, handleNext]);
-
-  const handlePrev = useCallback(() => {
-    setLoading(true);
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
-  }, []);
+  const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
 
   const handleNext = useCallback(() => {
     if (currentIndex >= stories.length - 1) {
@@ -31,34 +16,85 @@ export default function StoryViewer({ stories, startIndex, onClose }) {
     setCurrentIndex((prev) => prev + 1);
   }, [currentIndex, stories.length, onClose]);
 
+  const handlePrev = useCallback(() => {
+    setLoading(true);
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : prev));
+  }, []);
+
+  useEffect(() => {
+    if (stories.length === 0 || currentIndex >= stories.length) return;
+
+    const timer = setTimeout(() => {
+      handleNext();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [currentIndex, stories.length, handleNext]);
+
   if (!stories[currentIndex]) return null;
 
   const handleTouchStart = (e) => {
-    setTouchStart(e.touches[0].clientY);
+    setTouchStart({
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    });
   };
 
   const handleTouchMove = (e) => {
-    if (!touchStart) return;
+    if (!touchStart.x && !touchStart.y) return;
     
-    const currentTouch = e.touches[0].clientY;
-    const diff = currentTouch - touchStart;
+    const currentTouch = {
+      x: e.touches[0].clientX,
+      y: e.touches[0].clientY
+    };
     
-    // Only allow pulling down, not up
-    if (diff < 0) return;
+    const diff = {
+      x: currentTouch.x - touchStart.x,
+      y: currentTouch.y - touchStart.y
+    };
     
-    // Add resistance to the pull
+    // Determine if the gesture is primarily horizontal or vertical
+    const isHorizontalSwipe = Math.abs(diff.x) > Math.abs(diff.y);
+    
+    // Add resistance to the movement
     const resistance = 0.4;
-    setTranslateY(diff * resistance);
+    if (isHorizontalSwipe) {
+      // Handle horizontal swipe
+      setTranslate(prev => ({
+        ...prev,
+        x: diff.x * resistance
+      }));
+    } else {
+      // Handle vertical swipe (only allow pulling down)
+      if (diff.y < 0) return;
+      setTranslate(prev => ({
+        ...prev,
+        y: diff.y * resistance
+      }));
+    }
   };
 
   const handleTouchEnd = () => {
-    if (translateY > 150) {
-      // If pulled down far enough, close the story
+    const threshold = {
+      x: 100, // Threshold for horizontal swipe
+      y: 150  // Threshold for vertical swipe (close gesture)
+    };
+
+    if (Math.abs(translate.x) > threshold.x) {
+      // Horizontal swipe
+      if (translate.x > 0) {
+        onPrevProfile?.(); // Swipe right to previous profile
+      } else {
+        onNextProfile?.(); // Swipe left to next profile
+      }
+    } else if (translate.y > threshold.y) {
+      // Vertical swipe down - close the story
       onClose();
     }
+
     // Reset position
-    setTranslateY(0);
-    setTouchStart(null);
+    setTranslate({ x: 0, y: 0 });
+    setTouchStart({ x: 0, y: 0 });
   };
 
   return (
@@ -75,7 +111,10 @@ export default function StoryViewer({ stories, startIndex, onClose }) {
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ transform: `translateY(${translateY}px)` }}>
+        style={{ 
+          transform: `translate3d(${translate.x}px, ${translate.y}px, 0)`,
+          opacity: Math.max(1 - Math.abs(translate.y) / 400, 0.5) // Fade out when pulling down
+        }}>
         {loading && <div className="loader">Loading...</div>}
         <img
           src={stories[currentIndex].src}
