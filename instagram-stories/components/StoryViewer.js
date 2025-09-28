@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 export default function StoryViewer({ stories, startIndex, onClose }) {
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const [loading, setLoading] = useState(true);
+  const [touchStart, setTouchStart] = useState(null);
+  const [translateY, setTranslateY] = useState(0);
 
   useEffect(() => {
     if (stories.length === 0) return;
@@ -28,6 +30,34 @@ export default function StoryViewer({ stories, startIndex, onClose }) {
 
   if (!stories[currentIndex]) return null;
 
+  const handleTouchStart = (e) => {
+    setTouchStart(e.touches[0].clientY);
+  };
+
+  const handleTouchMove = (e) => {
+    if (!touchStart) return;
+    
+    const currentTouch = e.touches[0].clientY;
+    const diff = currentTouch - touchStart;
+    
+    // Only allow pulling down, not up
+    if (diff < 0) return;
+    
+    // Add resistance to the pull
+    const resistance = 0.4;
+    setTranslateY(diff * resistance);
+  };
+
+  const handleTouchEnd = () => {
+    if (translateY > 150) {
+      // If pulled down far enough, close the story
+      onClose();
+    }
+    // Reset position
+    setTranslateY(0);
+    setTouchStart(null);
+  };
+
   return (
     <div className="story-viewer">
       <button className="close-btn" onClick={onClose} aria-label="Close story">
@@ -37,7 +67,12 @@ export default function StoryViewer({ stories, startIndex, onClose }) {
         </svg>
       </button>
       
-      <div className="story-container">
+      <div 
+        className="story-container"
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ transform: `translateY(${translateY}px)` }}>
         {loading && <div className="loader">Loading...</div>}
         <img
           src={stories[currentIndex].src}
