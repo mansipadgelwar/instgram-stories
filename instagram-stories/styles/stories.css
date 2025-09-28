@@ -22,8 +22,36 @@
   cursor: pointer;
   padding: 3px;
   box-sizing: content-box;
-  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+ 
   flex-shrink: 0;
+}
+
+.story-thumbnail.unwatched {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  padding: 2px; /* thickness of gradient ring */
+  box-sizing: border-box;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.story-thumbnail.unwatched img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-sizing: border-box;
+  object-fit: cover;
+}
+
+
+.story-thumbnail.watched {
+  border: 2px solid #ccc;
 }
 
 .story-thumbnail img {
@@ -129,4 +157,37 @@
 .close-btn svg {
   width: 24px;
   height: 24px;
+}
+
+.story-thumbnail {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-sizing: border-box; /* important */
+}
+
+/* Unwatched = gradient ring */
+.story-thumbnail.unwatched {
+  padding: 2px; /* thickness of gradient ring */
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+/* Watched = gray ring */
+.story-thumbnail.watched {
+  padding: 2px; /* same padding as gradient so sizes match */
+  background: #ccc;
+}
+
+/* Image inside both types */
+.story-thumbnail img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: none; /* remove extra border */
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export default function StoriesBar({ onStorySelect }) {
+export default function StoriesBar({ onStorySelect,watched = [] }) {
   const [stories, setStories] = useState([]);
 
   useEffect(() => {
@@ -15,7 +15,9 @@ export default function StoriesBar({ onStorySelect }) {
       {stories.map((story) => (
         <div
           key={story.id}
-          className="story-thumbnail"
+         className={`story-thumbnail ${
+            watched.includes(story.id) ? "watched" : "unwatched"
+          }`}
           onClick={() => onStorySelect(story.id)}
         >
           <Image

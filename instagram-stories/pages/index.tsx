@@ -9,7 +9,21 @@ type Story = {
 
 export default function Home() {
   const [stories, setStories] = useState<Story[]>([]);
-  const [selectedStory, setSelectedStory] = useState<string | number | null>(null);
+ // selectedStory can be number or null
+const [selectedStory, setSelectedStory] = useState<number | null>(null);
+
+// watched is always an array of numbers
+const [watched, setWatched] = useState<number[]>([]);
+
+const handleStorySelect = (id: number) => {
+  setSelectedStory(id);
+
+  setWatched((prev) => 
+    prev.includes(id) ? prev : [...prev, id]
+  );
+};
+
+
 
   useEffect(() => {
     fetch("/data/stories.json")
@@ -19,7 +33,7 @@ export default function Home() {
 
   return (
     <div>
-      <StoriesBar onStorySelect={(id: string | number | null) => setSelectedStory(id)} />
+      <StoriesBar onStorySelect={handleStorySelect} watched={watched}/>
       {selectedStory !== null && (
         <StoryViewer
           stories={stories}
