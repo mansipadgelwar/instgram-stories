@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <div>
-      <StoriesBar onStorySelect={(id: SetStateAction<null>) => setSelectedStory(id)} />
+      <StoriesBar onStorySelect={(id: string | number | null) => setSelectedStory(id)} />
       {selectedStory !== null && (
         <StoryViewer
           stories={stories}
