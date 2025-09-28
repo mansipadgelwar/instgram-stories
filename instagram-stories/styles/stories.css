@@ -32,6 +32,7 @@
   border-radius: 50%;
   border: 2px solid white;
   box-sizing: border-box;
+  object-fit: cover;
 }
 
 .story-viewer {

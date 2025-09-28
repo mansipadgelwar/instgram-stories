@@ -24,8 +24,7 @@ export default function Home() {
         <StoryViewer
           stories={stories}
           startIndex={stories.findIndex((s) => s.id === selectedStory)}
-          onClose={() => setSelectedStory(null)}
-        />
+          onClose={() => setSelectedStory(null)} onPrevProfile={undefined} onNextProfile={undefined}        />
       )}
     </div>
   );
