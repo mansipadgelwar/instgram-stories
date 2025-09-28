@@ -14,15 +14,17 @@
 }
 
 .story-thumbnail {
+  min-width: 62px; /* Prevent squishing by setting minimum width */
   width: 62px;
   height: 62px;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
   border: 3px solid #d6249f;
-  padding: 2px; /* Add padding to create space between image and border */
-  box-sizing: border-box;
-  background: white; /* Add white background */
+  padding: 2px;
+  box-sizing: content-box; /* Change to content-box to prevent border and padding from affecting size */
+  background: white;
+  flex-shrink: 0; /* Prevent the images from shrinking */
 }
 
 .story-viewer {
